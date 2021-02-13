@@ -1,0 +1,123 @@
+<div id="play">
+  <%# cast button goes up here %>
+  <%= if @game.state == :lobby do %>
+    <div class="sharing">
+      <h1>Have a friend join by...</h1>
+      <h2>...Scanning this QR Code</h2>
+      <div
+        id="qrcode"
+        phx-hook="qrcode"
+        data-url="<%= Routes.join_url(@socket, :join, @game.code) %>"
+        phx-update="ignore"
+      ></div>
+      <h2>...Going to this URL</h2>
+      <input readonly value="<%= Routes.join_url(@socket, :join, @game.code) %>" />
+      <h2>...Entering this Code</h2>
+      <input readonly value="<%= @game.code %>" />
+    </div>
+
+    <hr />
+
+    <div class="lobby">
+      <h1>Players</h1>
+
+      <ol>
+        <%= for p <- Enum.reverse(@game.players) do %>
+          <li>
+            <%= if p == @player do %>
+              <form phx-submit="noop" phx-change="update_name" autocomplete="off">
+                <input type="text" name="name" value="<%= p.name %>" id="rename" phx-hook="rename" />
+              </form>
+            <% else %>
+              <%= p.name %>
+            <% end %>
+            <%= if p.host?, do: "(host)" %>
+          </li>
+        <% end %>
+      </ol>
+
+      <%= if @player.host? do %>
+        <%= if length(@game.players) >= 2 do %>
+          <button phx-click="start">Start Game</button>
+        <% else %>
+          <span>Not enough players.</span>
+        <% end %>
+      <% else %>
+        <span>Waiting for the host to start the game.</span>
+      <% end %>
+    </div>
+  <% else %>
+
+    <%= if @game.state == :round_finished do %>
+      <div class="overlay">
+        <h1>Round Over</h1>
+        <div>Round Score: <%= List.first(@player.scores) %></div>
+        <div>Total Score: <%= Enum.sum(@player.scores) %></div>
+        <%= if @player.ready? do %>
+          <div>Ready! Waiting for others...</div>
+        <% else %>
+          <button phx-click="ready">Ready!</button>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= if @game.state == :game_finished do %>
+      <div class="overlay">
+        <h1>Game Over</h1>
+        <div>You placed 1st. or 2nd. or last. I don't know</div>
+        <div>Final Score: <%= Enum.sum(@player.scores) %></div>
+        <%= if @player.ready? do %>
+          <div>Ready! Waiting for others...</div>
+        <% else %>
+          <button phx-click="ready">Play Again</button>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="decks">
+      <div>
+        <h1>Drawn</h1>
+        <div class="card n<%= @game.cur_card %>" phx-click="discard">
+          <span><%= @game.cur_card %></span>
+          <span><%= @game.cur_card %></span>
+          <span><%= @game.cur_card %></span>
+        </div>
+      </div>
+      <div>
+        <h1>Deck</h1>
+        <div class="card back" phx-click="take_deck">
+          <span>skyjo</span>
+          <span>skyjo</span>
+        </div>
+      </div>
+      <div>
+        <h1>Discard</h1>
+        <div class="card n<%= List.first(@game.discard) %>" phx-click="take_discard">
+          <span><%= List.first(@game.discard) %></span>
+          <span><%= List.first(@game.discard) %></span>
+          <span><%= List.first(@game.discard) %></span>
+        </div>
+      </div>
+    </div>
+
+    <br />
+    <br />
+
+    <div class="cards">
+      <%= for {i, num, state} <- @player.cards do %>
+        <%= if state == :hidden do %>
+          <div class="card back" phx-click="reveal" phx-value-i="<%= i %>">
+            <span>skyjo</span>
+            <span>skyjo</span>
+          </div>
+        <% else %>
+          <div class="card n<%= num %>" phx-click="reveal" phx-value-i="<%= i %>">
+            <span><%= num %></span>
+            <span><%= num %></span>
+            <span><%= num %></span>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

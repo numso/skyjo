@@ -1,0 +1,83 @@
+#home {
+  background: #27e5ec;
+  background: radial-gradient(circle, #a8e663 0%, #27e5ec 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .card-circle {
+    position: relative;
+
+    .card {
+      position: absolute;
+    }
+  }
+
+  h1 {
+    color: white;
+    font-size: 72px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px black;
+  }
+
+  .buttons {
+    position: relative;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 32px;
+
+    > div {
+      color: #444;
+      font-size: 14px;
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 8px 0;
+      &::before,
+      &::after {
+        content: '';
+        display: block;
+        width: 40%;
+        position: relative;
+        border-top: 1px solid #777;
+      }
+
+      &::before {
+        top: 8px;
+        left: 5%;
+      }
+
+      &::after {
+        top: -8px;
+        left: calc(300px - 45%);
+      }
+    }
+
+    > form {
+      display: flex;
+    }
+  }
+
+  .grow {
+    flex-grow: 1;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  input + button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  input {
+    text-transform: uppercase;
+    width: 100px;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+  }
+}

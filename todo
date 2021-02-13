@@ -1,0 +1,13 @@
+if round is finished, don't make player click to reveal if they discard new card
+shouldn't be able to reveal an already revealed card...
+
+when it's your turn to flip a card, you can accidentally choose one you've flipped already
+need hints for when it's your turn
+need animations for cards being flipped/discarded
+
+save gameid/playerid to localstorage. allow resume
+
+garbage collect stale games
+if a player leaves in lobby, remove them from game
+if a player leaves in game, do what? they could still rejoin?
+do we need more controls for the host to kick? add mid-game?

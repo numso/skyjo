@@ -1,0 +1,144 @@
+/* This file is for your main application css. */
+@import '../node_modules/nprogress/nprogress.css';
+@import './phoenix.scss';
+@import './home.scss';
+@import './play.scss';
+
+body {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px 32px;
+  border: none;
+  outline: none;
+  background: #454590;
+  color: white;
+  border-radius: 40px;
+  cursor: pointer;
+
+  &:hover {
+    background: #3a3a77;
+  }
+
+  &:active {
+    background: #2e2e5f;
+  }
+}
+
+input {
+  border: none;
+  font-size: 18px;
+  padding: 14px 24px;
+  outline: none;
+  min-width: 0;
+}
+
+.card {
+  border-radius: 5px;
+  border: 5px solid white;
+  width: 100px;
+  height: 150px;
+
+  &.back {
+    background: #555;
+    color: white;
+    position: relative;
+    font-size: 24px;
+    text-transform: uppercase;
+
+    > :first-child {
+      position: absolute;
+      top: 30px;
+      left: 12px;
+      transform: rotate(165deg);
+    }
+
+    > :last-child {
+      position: absolute;
+      bottom: 30px;
+      left: 13px;
+      transform: rotate(-15deg);
+    }
+  }
+
+  &:not(.back) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    > :nth-child(2) {
+      text-shadow: 0 0 8px white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    > :first-child,
+    > :last-child {
+      font-size: 20px;
+      position: absolute;
+      background: white;
+      border-radius: 100%;
+      padding: 0 8px;
+    }
+
+    > :first-child {
+      top: 4px;
+      left: 4px;
+    }
+
+    > :last-child {
+      bottom: 4px;
+      right: 4px;
+      transform: rotate(180deg);
+    }
+  }
+
+  &.n-2,
+  &.n-1 {
+    background: #3f27ce;
+    background: radial-gradient(circle, #f7f8fd 0%, #3f27ce 100%);
+  }
+
+  &.n0 {
+    background: #57ddfa;
+    background: radial-gradient(circle, #f3f7f6 0%, #57ddfa 100%);
+  }
+
+  &.n1,
+  &.n2,
+  &.n3,
+  &.n4 {
+    background: #a0da35;
+    background: radial-gradient(circle, #ecf1f3 0%, #a0da35 100%);
+  }
+
+  &.n5,
+  &.n6,
+  &.n7,
+  &.n8 {
+    background: #fdf62e;
+    background: radial-gradient(circle, #f9f6f4 0%, #fdf62e 100%);
+  }
+
+  &.n9,
+  &.n10,
+  &.n11,
+  &.n12 {
+    background: #f82932;
+    background: radial-gradient(circle, #f7f7fb 0%, #f82932 100%);
+  }
+}
