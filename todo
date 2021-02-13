@@ -4,6 +4,8 @@ shouldn't be able to reveal an already revealed card...
 when it's your turn to flip a card, you can accidentally choose one you've flipped already
 need hints for when it's your turn
 need animations for cards being flipped/discarded
+animation for reshuffle
+hint for how many cards left in deck? maybe?
 
 save gameid/playerid to localstorage. allow resume
 

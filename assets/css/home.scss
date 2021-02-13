@@ -56,8 +56,13 @@
       }
     }
 
-    > form {
+    form {
       display: flex;
+    }
+
+    a {
+      margin-top: 16px;
+      color: blue;
     }
   }
 

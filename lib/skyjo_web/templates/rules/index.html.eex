@@ -1,0 +1,13 @@
+<div id="rules">
+  <h1>SkyJo</h1>
+  <section>
+    <p>SkyJo is a card game for 2 - 8 players. Each game is played in a series of rounds.</p>
+    <p>At the start of a round, each player is dealt 12 cards face down. These are laid out in front of you as 4 columns of 3. You then pick 2 cards and flip them over. The player with the highest combined card value goes first for round 1.</p>
+    <p>During your turn you must first draw a card either from the deck or from the discard pile. You may then replace any of the cards in front of you (revealed or not) with the card you drew. The replaced card goes to the discard pile face up. If you do not wish to place your drawn card in front of you then you may discard it, but then must reveal one of your face down cards.</p>
+    <p>If at any point you reveal 3 matching cards in a column, those cards are discarded.</p>
+    <p>When a player reveals all of their cards they "go out". All other players then have one more turn before the game is finished. At the end of their last turn, all remaining cards in front of that player are revealed. The player that first went out goes first during the next round.</p>
+    <p>The objective is to have the lowest score. Your score is derived by summing up the point values of all the cards in front of you. If the player who first went out does not have the lowest score, then their score for the round is doubled. The game is played until any player's score meets or exceeds 100. The player with the lowest score at that point is the winner.</p>
+
+    <%= link "Back to Game", to: Routes.home_path(@conn, :index) %>
+  </section>
+</div>

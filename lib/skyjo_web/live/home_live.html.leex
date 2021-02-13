@@ -24,5 +24,6 @@
       <input type="text" name="code" placeholder="ABCD" maxlength="4" />
       <button type="submit">Join Game</button>
     </form>
+    <%= link "How To Play", to: Routes.rules_path(@socket, :index) %>
   </div>
 </div>

@@ -21,6 +21,7 @@ defmodule SkyjoWeb.Router do
     live "/play/:code", PlayLive, :index
 
     get "/join/:code", JoinController, :join
+    get "/rules", RulesController, :index
   end
 
   # Other scopes may use custom stacks.

@@ -79,9 +79,19 @@ defmodule Skyjo.Game do
   end
 
   def do_transition(%Game{state: :draw, cur_player: pid} = game, {pid, :take_deck}) do
-    # TODO:: what happens if deck is empty?
-    [card | deck] = game.deck
-    %Game{game | state: :discard, cur_card: card, deck: deck}
+    case game.deck do
+      [card | []] ->
+        %Game{
+          game
+          | state: :discard,
+            cur_card: card,
+            discard: [],
+            deck: Enum.shuffle(game.discard)
+        }
+
+      [card | deck] ->
+        %Game{game | state: :discard, cur_card: card, deck: deck}
+    end
   end
 
   def do_transition(%Game{state: :discard, cur_player: pid} = game, {pid, :discard}) do
