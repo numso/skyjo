@@ -1,0 +1,11 @@
+<script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
+<form phx-submit="join" style="display:flex;">
+  <input type="text" name="code" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase;"/>
+  <button type="submit" phx-disable-with="Joining...">Join Game</button>
+</form>
+<button phx-click="create" phx-disable-with="Creating...">Create Game</button>
+
+<div id="cast" phx-hook="cast" data-game-id="<%= @code %>" data-app-id="EE1584B1">
+  <google-cast-launcher></google-cast-launcher>
+</div>
