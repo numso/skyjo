@@ -99,29 +99,36 @@ defmodule Skyjo.Game do
   end
 
   def do_transition(%Game{state: :discard, cur_player: pid} = game, {pid, :reveal, i}) do
-    card = get_card(game, pid, i)
+    case get_card(game, pid, i) do
+      {_, _, :duplicate} ->
+        game
 
-    # TODO:: don't let them click on a :duplicate spot
-    game
-    |> update_cards(&List.replace_at(&1, i, {i, game.cur_card, :revealed}))
-    |> update_state(:draw)
-    |> (fn game -> %Game{game | cur_card: nil, discard: [card | game.discard]} end).()
-    |> check_endgame()
-    |> remove_duplicates()
-    |> (fn game -> %Game{game | cur_player: next_player(game)} end).()
-    |> double_check_endgame()
+      {_, card, _} ->
+        game
+        |> update_cards(&List.replace_at(&1, i, {i, game.cur_card, :revealed}))
+        |> update_state(:draw)
+        |> (fn game -> %Game{game | cur_card: nil, discard: [card | game.discard]} end).()
+        |> check_endgame()
+        |> remove_duplicates()
+        |> (fn game -> %Game{game | cur_player: next_player(game)} end).()
+        |> double_check_endgame()
+    end
   end
 
   def do_transition(%Game{state: :reveal, cur_player: pid} = game, {pid, :reveal, i}) do
-    # TODO:: don't let them click on a :duplicate spot
-    # TODO:: don't let them click on a :revealed spot
-    game
-    |> update_cards(&List.update_at(&1, i, fn {i, num, _} -> {i, num, :revealed} end))
-    |> update_state(:draw)
-    |> check_endgame()
-    |> remove_duplicates()
-    |> (fn game -> %Game{game | cur_player: next_player(game)} end).()
-    |> double_check_endgame()
+    case get_card(game, pid, i) do
+      {_, _, :hidden} ->
+        game
+        |> update_cards(&List.update_at(&1, i, fn {i, num, _} -> {i, num, :revealed} end))
+        |> update_state(:draw)
+        |> check_endgame()
+        |> remove_duplicates()
+        |> (fn game -> %Game{game | cur_player: next_player(game)} end).()
+        |> double_check_endgame()
+
+      _ ->
+        game
+    end
   end
 
   def do_transition(%Game{state: :round_finished} = game, {pid, :ready}) do
@@ -196,7 +203,7 @@ defmodule Skyjo.Game do
 
   defp next_player(game) do
     player_index = Enum.find_index(game.players, &(&1.code == game.cur_player))
-    player = Enum.at(game.players, player_index + 1, List.first(game.players))
+    player = Enum.at(game.players, player_index - 1, List.last(game.players))
     player.code
   end
 
@@ -295,8 +302,13 @@ defmodule Skyjo.Game do
 
     new_players =
       Enum.map(game.players, fn player ->
-        score = get_score(game, player.code)
-        score = if player.code == pid and should_double, do: score * 2, else: score
+        score =
+          case {get_score(game, player.code), player.code, should_double} do
+            {score, ^pid, true} -> {score, :doubled}
+            {score, ^pid, _} -> {score, :first}
+            {score, _, _} -> score
+          end
+
         %{player | scores: [score | player.scores]}
       end)
 
@@ -304,10 +316,24 @@ defmodule Skyjo.Game do
   end
 
   defp set_finished_state(%Game{players: players} = game) do
-    max_score = players |> Enum.map(&Enum.sum(&1.scores)) |> Enum.sort() |> List.last()
+    max_score = players |> Enum.map(&sum_scores(&1.scores)) |> Enum.sort() |> List.last()
     next_state = if max_score >= 100, do: :game_finished, else: :round_finished
     %Game{game | state: next_state, out_player: nil}
   end
+
+  def sum_scores(scores) do
+    scores
+    |> Enum.map(fn
+      {num, :doubled} -> num * 2
+      {num, :first} -> num
+      num -> num
+    end)
+    |> Enum.sum()
+  end
+
+  def render_score({num, :doubled}), do: "#{num} x 2"
+  def render_score({num, _}), do: num
+  def render_score(num), do: num
 
   defp fully_revealed?(%Game{players: players, cur_player: pid}) do
     players
@@ -334,7 +360,6 @@ defmodule Skyjo.Game do
     |> Enum.find(&(&1.code == pid))
     |> Map.get(:cards)
     |> Enum.find(fn {index, _, _} -> index == i end)
-    |> elem(1)
   end
 
   defp get_score(%Game{players: players}, pid) do

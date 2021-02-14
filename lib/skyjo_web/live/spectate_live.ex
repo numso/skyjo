@@ -1,10 +1,10 @@
-defmodule SkyjoWeb.PlayLive do
+defmodule SkyjoWeb.SpectateLive do
   use SkyjoWeb, :live_view
 
-  alias Skyjo.{Game, Games}
+  alias Skyjo.{Games}
 
   @impl true
-  def mount(%{"code" => code, "player" => player}, _session, socket) do
+  def mount(%{"code" => code}, _session, socket) do
     if connected?(socket), do: Games.subscribe(code)
 
     case Games.get_game(code) do
@@ -15,16 +15,7 @@ defmodule SkyjoWeb.PlayLive do
          |> push_redirect(to: "/")}
 
       game ->
-        case socket |> assign(pid: player) |> assign_defaults(game) do
-          %{assigns: %{player: nil}} ->
-            {:ok,
-             socket
-             |> put_flash(:error, "Invalid player code")
-             |> push_redirect(to: "/")}
-
-          socket ->
-            {:ok, socket}
-        end
+        {:ok, socket |> assign(game: game)}
     end
   end
 
@@ -32,91 +23,54 @@ defmodule SkyjoWeb.PlayLive do
   def mount(_, _session, socket) do
     {:ok,
      socket
-     |> put_flash(:error, "Missing Game or Player Code")
+     |> put_flash(:error, "Missing Game Code")
      |> push_redirect(to: "/")}
   end
 
   @impl true
-  def handle_event("noop", _, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("update_name", %{"name" => name}, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :rename, name})
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("start", _, socket) do
-    Game.transition(socket.assigns.game, nil)
-    {:noreply, socket}
-  end
-
-  def handle_event("ready", _, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :ready})
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("reveal", %{"i" => i}, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :reveal, String.to_integer(i)})
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("take_discard", _, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :take_discard})
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("take_deck", _, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :take_deck})
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("discard", _, socket) do
-    Game.transition(socket.assigns.game, {socket.assigns.pid, :discard})
+  def handle_event(_, _, socket) do
     {:noreply, socket}
   end
 
   @impl true
   def handle_info({:game_updated, game}, socket) do
-    {:noreply, socket |> assign_defaults(game)}
+    {:noreply, socket |> assign(game: game)}
   end
 
-  defp assign_defaults(socket, game) do
-    socket
-    |> assign(game: game)
-    |> assign(player: Enum.find(game.players, &(&1.code == socket.assigns.pid)))
+  defp game_state(game) do
+    case {player(game), instruction(game)} do
+      {nil, _} -> ""
+      {player, ""} -> "#{player.name}'s Turn"
+      {player, wat} -> "#{player.name}'s Turn - #{wat}"
+    end
   end
+
+  def score_class({_, :doubled}), do: "doubled"
+  def score_class({_, :first}), do: "first"
+  def score_class(_), do: ""
+
+  defp player(%{cur_player: nil}), do: nil
+
+  defp player(%{cur_player: pid, players: p}) do
+    Enum.find(p, &(&1.code == pid))
+  end
+
+  defp instruction(game) do
+    case game.state do
+      :draw -> "Drawing a card"
+      :discard -> "Discarding a card"
+      :reveal -> "Revealing one of their cards"
+      _ -> ""
+    end
+  end
+
+  def active_class(%{cur_player: pid}, %{code: pid}), do: "active"
+  def active_class(%{out_player: pid}, %{code: pid}), do: "out"
+  def active_class(_, _), do: ""
 
   def render_card({_, _, :hidden}), do: card(:back)
   def render_card({_, _, :duplicate}), do: card(:blank)
   def render_card({_, num, _}), do: card(num)
-
-  def deck_state(game, player) do
-    case {my_turn?(game, player), game.state} do
-      {true, :draw} -> "draw"
-      {true, :discard} -> "discard"
-      {true, :reveal} -> "reveal"
-      _ -> "none"
-    end
-  end
-
-  def instruction(game, player) do
-    case deck_state(game, player) do
-      "none" -> ""
-      "draw" -> "Pick one of these ➜"
-      "discard" -> "Choose where to put it. Or tap it to discard it."
-      "reveal" -> "Pick a spot to reveal 🠗"
-    end
-  end
-
-  def my_turn?(%{cur_player: pid}, %{code: pid}), do: true
-  def my_turn?(_, _), do: false
 
   def card(:blank) do
     """

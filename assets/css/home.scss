@@ -1,24 +1,44 @@
+html,
+body,
+body > div {
+  height: 100%;
+}
+
 #home {
   background: #27e5ec;
   background: radial-gradient(circle, #a8e663 0%, #27e5ec 100%);
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  .card-circle {
-    position: relative;
+  .card-circle-holder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
 
-    .card {
-      position: absolute;
+    .card-circle {
+      position: relative;
+
+      .card {
+        position: absolute;
+      }
     }
   }
 
   h1 {
+    position: relative;
     color: white;
     font-size: 72px;
     text-transform: uppercase;
     text-shadow: 0 0 8px black;
+    margin: 0;
+    padding: 16px 0 32px;
   }
 
   .buttons {

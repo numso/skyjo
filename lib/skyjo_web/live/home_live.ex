@@ -41,6 +41,6 @@ defmodule SkyjoWeb.HomeLive do
     radians = degrees / 180 * :math.pi()
     x = :math.cos(radians)
     y = :math.sin(radians)
-    "top:#{130 + x * -150}px;left:#{y * 130 - 55}px;transform:rotate(#{degrees}deg);"
+    "top:#{250 + x * -150}px;left:#{y * 130 - 55}px;transform:rotate(#{degrees}deg);"
   end
 end
