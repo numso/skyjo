@@ -17,12 +17,13 @@ defmodule SkyjoWeb.Router do
   scope "/", SkyjoWeb do
     pipe_through :browser
 
-    live "/", HomeLive, :index
+    get "/", HomeController, :index
+    get "/create", HomeController, :create
+    get "/join", HomeController, :join
+    get "/rules", RulesController, :index
+
     live "/play/:code", PlayLive, :index
     live "/spectate/:code", SpectateLive, :index
-
-    get "/join/:code", JoinController, :join
-    get "/rules", RulesController, :index
   end
 
   # Other scopes may use custom stacks.

@@ -38,11 +38,11 @@
       <div
         id="qrcode"
         phx-hook="qrcode"
-        data-url="<%= Routes.join_url(@socket, :join, @game.code) %>"
+        data-url="<%= Routes.home_url(@socket, :join, code: @game.code) %>"
         phx-update="ignore"
       ></div>
       <h2>...or Going to this URL</h2>
-      <input readonly value="<%= Routes.join_url(@socket, :join, @game.code) %>" />
+      <input readonly value="<%= Routes.home_url(@socket, :join, code: @game.code) %>" />
       <h2>...or Entering this Code</h2>
       <input readonly value="<%= @game.code %>" />
     </div>

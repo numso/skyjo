@@ -1,7 +1,16 @@
-defmodule SkyjoWeb.JoinController do
+defmodule SkyjoWeb.HomeController do
   use SkyjoWeb, :controller
 
   alias Skyjo.Game
+
+  def index(conn, _params) do
+    render(conn, "index.html")
+  end
+
+  def create(conn, _params) do
+    {player, game} = Game.create()
+    conn |> redirect(to: "/play/#{game.code}?player=#{player.code}")
+  end
 
   def join(conn, %{"code" => code}) do
     code = String.upcase(code)
@@ -22,5 +31,9 @@ defmodule SkyjoWeb.JoinController do
       {:error, :full_game} ->
         conn |> put_flash(:error, "Game is full") |> redirect(to: "/")
     end
+  end
+
+  def join(conn, _) do
+    conn |> put_flash(:error, "Join Code is required") |> redirect(to: "/")
   end
 end

@@ -80,7 +80,7 @@ body > div {
       display: flex;
     }
 
-    a {
+    a:not(.btn) {
       margin-top: 16px;
       color: blue;
     }
@@ -90,7 +90,7 @@ body > div {
     flex-grow: 1;
   }
 
-  button {
+  button, .btn {
     width: 100%;
   }
 

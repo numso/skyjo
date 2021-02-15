@@ -1,0 +1,27 @@
+<div id="home">
+  <div class="card-circle-holder">
+    <div class="card-circle">
+      <%= for i <- 12..-2 do %>
+        <div class="card n<%= i %>" style="<%= card_style(i) %>">
+          <span><%= i %></span>
+          <span><%= i %></span>
+          <span><%= i %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <h1>SkyJo</h1>
+  <div class="grow">
+  </div>
+  <div class="buttons">
+    <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+    <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+    <%= link "Create Game", to: Routes.home_path(@conn, :create), class: "btn" %>
+    <div>or</div>
+    <%= form_for @conn, Routes.home_path(@conn, :join), [method: :get], fn f -> %>
+      <%= text_input f, :code, placeholder: "ABCD", maxlength: 4 %>
+      <%= submit "Join Game" %>
+    <% end %>
+    <%= link "How To Play", to: Routes.rules_path(@conn, :index) %>
+  </div>
+</div>
