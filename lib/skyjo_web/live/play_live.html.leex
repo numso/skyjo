@@ -1,5 +1,10 @@
+<script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
 <div id="play">
-  <%# cast button goes up here %>
+  <div id="cast" phx-hook="cast" data-game-id="<%= @game.code %>" data-app-id="EE1584B1">
+    <google-cast-launcher></google-cast-launcher>
+  </div>
+
   <%= if @game.state == :lobby do %>
     <div class="lobby">
       <h1>Players</h1>

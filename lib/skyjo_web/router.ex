@@ -23,7 +23,7 @@ defmodule SkyjoWeb.Router do
     get "/rules", RulesController, :index
 
     live "/play/:code", PlayLive, :index
-    live "/spectate/:code", SpectateLive, :index
+    live "/cast", SpectateLive, :index
   end
 
   # Other scopes may use custom stacks.

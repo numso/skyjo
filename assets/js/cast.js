@@ -34,7 +34,6 @@ export default {
                     type: 'message',
                     text: gameId
                   })
-                  this.pushEvent('create', {})
                 }
                 break
               }
@@ -60,7 +59,9 @@ export default {
           this.pushEvent('start', { code: customEvent.data.text })
         }
       })
-      context.start()
+      const options = new cast.framework.CastReceiverOptions()
+      options.disableIdleTimeout = true
+      context.start(options)
     }
   }
 }
