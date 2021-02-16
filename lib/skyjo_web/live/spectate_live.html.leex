@@ -19,7 +19,7 @@
           <div
             id="qrcode"
             phx-hook="qrcode"
-            data-url="<%= Routes.join_url(@socket, :join, @game.code) %>"
+            data-url="<%= Routes.home_url(@socket, :join, code: @game.code) %>"
             phx-update="ignore"
           ></div>
         </div>

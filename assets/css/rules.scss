@@ -1,10 +1,11 @@
 #rules {
   background: #27e5ec;
   background: radial-gradient(circle, #a8e663 0%, #27e5ec 100%);
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: auto;
 
   h1 {
     color: white;
