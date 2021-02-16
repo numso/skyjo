@@ -1,100 +1,102 @@
-<div id="spectate">
-  <%= if @game.state == :lobby do %>
-    <div class="lobby">
-      <h1>Players</h1>
+<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+<div id="spectate" phx-hook="game" >
+  <%= if @game.code do %>
+    <%= if @game.state == :lobby do %>
+      <div class="lobby">
+        <h1>Players</h1>
+        <ol>
+          <%= for p <- Enum.reverse(@game.players) do %>
+            <li>
+              <%= p.name %>
+              <%= if p.host?, do: "(host)" %>
+            </li>
+          <% end %>
+        </ol>
 
-      <ol>
-        <%= for p <- Enum.reverse(@game.players) do %>
-          <li>
-            <%= p.name %>
-            <%= if p.host?, do: "(host)" %>
-          </li>
-        <% end %>
-      </ol>
-
-    </div>
-
-    <hr />
-
-    <div class="sharing">
-      <h1>Have a friend join by...</h1>
-      <h2>...Scanning this QR Code</h2>
-      <div
-        id="qrcode"
-        phx-hook="qrcode"
-        data-url="<%= Routes.join_url(@socket, :join, @game.code) %>"
-        phx-update="ignore"
-      ></div>
-      <h2>...or Going to this URL</h2>
-      <input readonly value="<%= Routes.join_url(@socket, :join, @game.code) %>" />
-      <h2>...or Entering this Code</h2>
-      <input readonly value="<%= @game.code %>" />
-    </div>
-  <% else %>
-
-    <%= if @game.state == :round_finished or @game.state == :game_finished do %>
-      <div class="overlay">
-        <h1>
-          <%= if @game.state == :round_finished, do: "Round Over", else: "Game Over" %>
-        </h1>
-        <table>
-          <thead>
-            <th></th>
-            <%= for i <- 1..(@game.players |> List.first() |> Map.get(:scores) |> length) do %>
-              <th>Round <%= i %></th>
-            <% end %>
-            <th></th>
-            <th>Total</th>
-          </thead>
-          <tbody>
-            <%= for p <- Enum.reverse(@game.players) do %>
-              <tr>
-                <td>
-                  <%= p.name %>
-                  <span><%= if p.ready?, do: "✓" %></span>
-                </td>
-                <%= for s <- Enum.reverse(p.scores) do %>
-                  <td class="<%= score_class(s) %>"><%= Skyjo.Game.render_score(s) %></td>
-                <% end %>
-                <td></td>
-                <td><%= Skyjo.Game.sum_scores(p.scores) %></td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+        <div class="sharing">
+          <label>Game Code</label>
+          <span><%= @game.code %></span>
+          <div
+            id="qrcode"
+            phx-hook="qrcode"
+            data-url="<%= Routes.join_url(@socket, :join, @game.code) %>"
+            phx-update="ignore"
+          ></div>
+        </div>
       </div>
-    <% end %>
+    <% else %>
 
-    <div class="instructions">
-      <%= game_state(@game) %>
-    </div>
-
-    <div class="decks deck-all %>">
-      <div class="drawn">
-        <h1>Drawn</h1>
-        <%= raw card(@game.cur_card) %>
-      </div>
-      <div class="deck">
-        <h1>Deck</h1>
-        <%= raw card(:back) %>
-      </div>
-      <div class="discard">
-        <h1>Discard</h1>
-        <%= raw card(List.first(@game.discard)) %>
-      </div>
-    </div>
-
-    <div class="super-cards">
-      <%= for p <- Enum.reverse(@game.players) do %>
-        <div class="<%= active_class(@game, p) %>">
-          <h1><%= p.name %></h1>
-          <div class="cards">
-            <%= for card <- p.cards do %>
-              <%= raw render_card(card) %>
-            <% end %>
-          </div>
+      <%= if @game.state == :round_finished or @game.state == :game_finished do %>
+        <div class="overlay">
+          <h1>
+            <%= if @game.state == :round_finished, do: "Round Over", else: "Game Over" %>
+          </h1>
+          <table>
+            <thead>
+              <th></th>
+              <%= for i <- 1..(@game.players |> List.first() |> Map.get(:scores) |> length) do %>
+                <th>Round <%= i %></th>
+              <% end %>
+              <th></th>
+              <th>Total</th>
+            </thead>
+            <tbody>
+              <%= for p <- Enum.reverse(@game.players) do %>
+                <tr>
+                  <td>
+                    <%= p.name %>
+                    <span><%= if p.ready?, do: "✓" %></span>
+                  </td>
+                  <%= for s <- Enum.reverse(p.scores) do %>
+                    <td class="<%= score_class(s) %>"><%= Skyjo.Game.render_score(s) %></td>
+                  <% end %>
+                  <td></td>
+                  <td><%= Skyjo.Game.sum_scores(p.scores) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
         </div>
       <% end %>
-    </div>
+
+      <div class="game">
+        <div class="players">
+          <%= for row <- rows(@game) do %>
+            <div class="row">
+              <%= for p <- row do %>
+                <div class="player <%= player_class(@game, p) %>">
+                  <label><%= p.name %></label>
+                  <div class="cards">
+                    <%= for column <- Enum.chunk_every(p.cards, 3) do %>
+                      <div class="column">
+                        <%= for card <- column do %>
+                          <%= raw render_card(card) %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <div class="decks">
+          <div class="deck">
+            <label>Deck</label>
+            <%= raw render_card(:back) %>
+          </div>
+          <div class="discard">
+            <label>Discard</label>
+            <%= raw @game.discard |> List.first() |> render_card() %>
+          </div>
+          <div class="drawn">
+            <label>Drawn</label>
+            <%= raw @game.cur_card |> render_card() %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="loading">Loading...</div>
   <% end %>
 </div>

@@ -19,7 +19,7 @@ defmodule SkyjoWeb.Router do
 
     live "/", HomeLive, :index
     live "/play/:code", PlayLive, :index
-    live "/spectate/:code", SpectateLive, :index
+    live "/cast", SpectateLive, :index
 
     get "/join/:code", JoinController, :join
     get "/rules", RulesController, :index

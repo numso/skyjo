@@ -8,6 +8,12 @@ use Mix.Config
 # with webpack to recompile .js and .css sources.
 config :skyjo, SkyjoWeb.Endpoint,
   http: [port: 4000],
+  https: [
+    port: 4001,
+    cipher_suite: :strong,
+    keyfile: "priv/cert/domain.key",
+    certfile: "priv/cert/chained.pem"
+  ],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
