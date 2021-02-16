@@ -15,6 +15,11 @@ export default {
   cast: {
     mounted () {
       const { appId, gameId } = this.el.dataset
+      const sendCode = context => {
+        const castSession = context.getCurrentSession()
+        if (!castSession) return
+        castSession.sendMessage(CUSTOM_URN_ID, { type: 'code', text: gameId })
+      }
       onCastLoaded(isAvailable => {
         if (!isAvailable) return
         const context = cast.framework.CastContext.getInstance()
@@ -27,22 +32,14 @@ export default {
           event => {
             switch (event.sessionState) {
               case cast.framework.SessionState.SESSION_STARTED: {
-                console.log('CastSession started')
-                const castSession = context.getCurrentSession()
-                if (castSession) {
-                  castSession.sendMessage(CUSTOM_URN_ID, {
-                    type: 'message',
-                    text: gameId
-                  })
-                }
+                sendCode(context)
                 break
               }
               case cast.framework.SessionState.SESSION_RESUMED: {
-                console.log('CastSession resumed')
+                sendCode(context)
                 break
               }
               case cast.framework.SessionState.SESSION_ENDED: {
-                console.log('CastSession disconnected')
                 break
               }
             }
@@ -55,7 +52,7 @@ export default {
     mounted () {
       const context = cast.framework.CastReceiverContext.getInstance()
       context.addCustomMessageListener(CUSTOM_URN_ID, customEvent => {
-        if (customEvent.data.type == 'message') {
+        if (customEvent.data.type == 'code') {
           this.pushEvent('start', { code: customEvent.data.text })
         }
       })
