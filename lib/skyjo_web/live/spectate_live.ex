@@ -41,12 +41,19 @@ defmodule SkyjoWeb.SpectateLive do
     {:noreply, assign(socket, game: game)}
   end
 
+  @impl true
+  def handle_info(_, socket) do
+    {:noreply, socket}
+  end
+
   defp rows(game) do
-    if length(game.players) <= 3 do
-      [Enum.reverse(game.players)]
+    players = Enum.filter(game.players, & &1.active?)
+
+    if length(players) <= 3 do
+      [Enum.reverse(players)]
     else
-      mid = (length(game.players) / 2) |> :math.floor() |> trunc()
-      {a, b} = Enum.split(game.players, mid)
+      mid = (length(players) / 2) |> :math.floor() |> trunc()
+      {a, b} = Enum.split(players, mid)
       [Enum.reverse(b), a]
     end
   end

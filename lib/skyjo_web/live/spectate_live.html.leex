@@ -5,10 +5,14 @@
       <div class="lobby">
         <h1>Players</h1>
         <ol>
-          <%= for p <- Enum.reverse(@game.players) do %>
+          <%= for {p, i} <- @game.players |> Enum.reverse() |> Enum.with_index() do %>
             <li>
-              <%= p.name %>
-              <%= if p.host?, do: "(host)" %>
+              <div class="wrapper">
+                <div class="name"><%= p.name %></div>
+                <%= if i == 0 do %>
+                  <div class="host-tag">(host)</div>
+                <% end %>
+              </div>
             </li>
           <% end %>
         </ol>
@@ -42,7 +46,7 @@
             </thead>
             <tbody>
               <%= for p <- Enum.reverse(@game.players) do %>
-                <tr>
+                <tr class="<%= if not p.active?, do: "inactive" %>">
                   <td>
                     <%= p.name %>
                     <span><%= if p.ready?, do: "✓" %></span>

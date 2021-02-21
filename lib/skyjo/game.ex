@@ -11,15 +11,21 @@ defmodule Skyjo.Game do
             out_player: nil
 
   def create() do
-    player = new_player(true)
+    player = new_player()
     game = %Game{code: new_code(), state: :lobby, players: [player]}
     :ok = Games.set_game(game)
     {player, game}
   end
 
-  defp new_player(host? \\ false) do
-    code = new_code()
-    %{code: code, name: "player", cards: [], scores: [], host?: host?, ready?: false}
+  defp new_player() do
+    %{
+      code: new_code(),
+      name: "player",
+      cards: [],
+      scores: [],
+      active?: true,
+      ready?: false
+    }
   end
 
   def join(code) when code in ["", nil], do: {:error, :code_missing}
@@ -29,41 +35,62 @@ defmodule Skyjo.Game do
       nil ->
         {:error, :game_missing}
 
-      game when game.state != :lobby ->
+      game when game.state not in [:lobby, :round_finished, :game_finished] ->
         {:error, :game_in_progress}
 
-      %Game{players: p} when length(p) == 8 ->
-        {:error, :full_game}
-
       game ->
-        player = new_player()
-        new_game = %Game{game | players: [player | game.players]}
-        :ok = Games.set_game(new_game)
-        {:ok, {player, new_game}}
+        if game.players |> active_players() |> length() == 8 do
+          {:error, :full_game}
+        else
+          player =
+            if game.state == :lobby do
+              new_player()
+            else
+              my_scores =
+                game.players
+                |> List.first()
+                |> Map.get(:scores)
+                |> Enum.map(fn _ -> {0, :inactive} end)
+
+              # TODO:: pop off the last score, put in the average instead with some tag signifying such
+              %{new_player() | scores: my_scores}
+            end
+
+          new_game = %Game{game | players: [player | game.players]}
+          :ok = Games.set_game(new_game)
+          {:ok, {player, new_game}}
+        end
     end
   end
 
-  def transition(game, action) do
-    do_transition(game, action)
-    |> Games.set_game()
+  def transition(game, pid, action) do
+    do_transition(game, pid, action) |> Games.set_game()
   end
 
-  def do_transition(%Game{} = game, {pid, :rename, name}) do
+  defp do_transition(%Game{} = game, pid, {:rename, name}) do
     player_index = Enum.find_index(game.players, &(&1.code == pid))
     player = Enum.at(game.players, player_index)
     new_player = %{player | name: name}
     %{game | players: List.replace_at(game.players, player_index, new_player)}
   end
 
-  def do_transition(%Game{state: :lobby, players: p} = game, _) when length(p) < 2 do
-    game
+  defp do_transition(%Game{state: :lobby, players: players} = game, _, :start) do
+    if players |> active_players() |> length() < 2 do
+      game
+    else
+      # TODO:: only host can start the game
+      start_game(game, true)
+    end
   end
 
-  def do_transition(%Game{state: :lobby} = game, _) do
-    start_game(game)
+  defp do_transition(%Game{state: :lobby} = game, _, {:kick, pid}) do
+    # TODO:: only host can kick others
+    # TODO:: if no active players are left, remove the game
+    Games.broadcast(game.code, {:player_kicked, pid})
+    %{game | players: Enum.reject(game.players, &(&1.code == pid))}
   end
 
-  def do_transition(%Game{state: :start} = game, {pid, :reveal, i}) do
+  defp do_transition(%Game{state: :start} = game, pid, {:reveal, i}) do
     if player_ready?(game, pid) do
       game
     else
@@ -73,12 +100,12 @@ defmodule Skyjo.Game do
     end
   end
 
-  def do_transition(%Game{state: :draw, cur_player: pid} = game, {pid, :take_discard}) do
+  defp do_transition(%Game{state: :draw, cur_player: pid} = game, pid, :take_discard) do
     [card | discard] = game.discard
     %Game{game | state: :discard, cur_card: card, discard: discard}
   end
 
-  def do_transition(%Game{state: :draw, cur_player: pid} = game, {pid, :take_deck}) do
+  defp do_transition(%Game{state: :draw, cur_player: pid} = game, pid, :take_deck) do
     case game.deck do
       [card | []] ->
         %Game{
@@ -94,11 +121,11 @@ defmodule Skyjo.Game do
     end
   end
 
-  def do_transition(%Game{state: :discard, cur_player: pid} = game, {pid, :discard}) do
+  defp do_transition(%Game{state: :discard, cur_player: pid} = game, pid, :discard) do
     %Game{game | state: :reveal, cur_card: nil, discard: [game.cur_card | game.discard]}
   end
 
-  def do_transition(%Game{state: :discard, cur_player: pid} = game, {pid, :reveal, i}) do
+  defp do_transition(%Game{state: :discard, cur_player: pid} = game, pid, {:reveal, i}) do
     case get_card(game, pid, i) do
       {_, _, :duplicate} ->
         game
@@ -115,7 +142,7 @@ defmodule Skyjo.Game do
     end
   end
 
-  def do_transition(%Game{state: :reveal, cur_player: pid} = game, {pid, :reveal, i}) do
+  defp do_transition(%Game{state: :reveal, cur_player: pid} = game, pid, {:reveal, i}) do
     case get_card(game, pid, i) do
       {_, _, :hidden} ->
         game
@@ -131,37 +158,63 @@ defmodule Skyjo.Game do
     end
   end
 
-  def do_transition(%Game{state: :round_finished} = game, {pid, :ready}) do
+  defp do_transition(%Game{state: :round_finished} = game, _, {:kick, pid}) do
+    # TODO:: only host can kick others
+    # TODO:: if no active players are left, remove the game
+    Games.broadcast(game.code, {:player_kicked, pid})
     player_index = Enum.find_index(game.players, &(&1.code == pid))
     player = Enum.at(game.players, player_index)
-    new_player = %{player | ready?: true}
+    new_player = %{player | active?: false}
     new_game = %{game | players: List.replace_at(game.players, player_index, new_player)}
 
-    if Enum.all?(new_game.players, & &1.ready?) do
-      new_players = Enum.map(new_game.players, fn player -> %{player | ready?: false} end)
-      start_game(%Game{new_game | players: new_players})
+    if new_game.cur_player == player.code do
+      %{new_game | cur_player: nil}
     else
       new_game
     end
   end
 
-  def do_transition(%Game{state: :game_finished} = game, {pid, :ready}) do
+  defp do_transition(%Game{state: :round_finished} = game, pid, :ready) do
     player_index = Enum.find_index(game.players, &(&1.code == pid))
     player = Enum.at(game.players, player_index)
     new_player = %{player | ready?: true}
     new_game = %{game | players: List.replace_at(game.players, player_index, new_player)}
 
-    if Enum.all?(new_game.players, & &1.ready?) do
+    if new_game.players |> active_players() |> Enum.all?(& &1.ready?) do
+      new_players = Enum.map(new_game.players, fn player -> %{player | ready?: false} end)
+      start_game(%Game{new_game | players: new_players}, false)
+    else
+      new_game
+    end
+  end
+
+  defp do_transition(%Game{state: :game_finished} = game, _, {:kick, pid}) do
+    # TODO:: only host can kick others
+    # TODO:: if no active players are left, remove the game
+    Games.broadcast(game.code, {:player_kicked, pid})
+    player_index = Enum.find_index(game.players, &(&1.code == pid))
+    player = Enum.at(game.players, player_index)
+    new_player = %{player | active?: false}
+    %{game | players: List.replace_at(game.players, player_index, new_player)}
+  end
+
+  defp do_transition(%Game{state: :game_finished} = game, pid, :ready) do
+    player_index = Enum.find_index(game.players, &(&1.code == pid))
+    player = Enum.at(game.players, player_index)
+    new_player = %{player | ready?: true}
+    new_game = %{game | players: List.replace_at(game.players, player_index, new_player)}
+
+    if new_game.players |> active_players |> Enum.all?(& &1.ready?) do
       new_players =
         Enum.map(new_game.players, fn player -> %{player | ready?: false, scores: []} end)
 
-      start_game(%Game{new_game | players: new_players, cur_player: nil})
+      start_game(%Game{new_game | players: new_players, cur_player: nil}, true)
     else
       new_game
     end
   end
 
-  def do_transition(game, _), do: game
+  defp do_transition(game, _, _), do: game
 
   defp new_code do
     <<:rand.uniform(1_048_576)::40>>
@@ -169,20 +222,33 @@ defmodule Skyjo.Game do
     |> binary_part(4, 4)
   end
 
-  defp start_game(game) do
-    deck = get_deck() |> Enum.shuffle()
-    {piles, [discard | deck]} = deal_cards(deck, length(game.players))
+  defp active_players(players) do
+    Enum.filter(players, & &1.active?)
+  end
 
-    players =
-      Enum.zip(game.players, piles)
-      |> Enum.map(fn {player, cards} ->
-        %{
-          player
-          | cards: cards |> Enum.with_index() |> Enum.map(fn {num, i} -> {i, num, :hidden} end)
-        }
+  defp start_game(game, is_new?) do
+    deck = get_deck() |> Enum.shuffle()
+    active_players = Enum.filter(game.players, & &1.active?)
+    {piles, [discard | deck]} = deal_cards(deck, length(active_players))
+    players = if is_new?, do: active_players, else: game.players
+
+    {players, []} =
+      Enum.reduce(players, {[], piles}, fn
+        %{active?: false} = player, {players, piles} ->
+          {[player | players], piles}
+
+        player, {players, [cards | piles]} ->
+          {[
+             %{
+               player
+               | cards:
+                   cards |> Enum.with_index() |> Enum.map(fn {num, i} -> {i, num, :hidden} end)
+             }
+             | players
+           ], piles}
       end)
 
-    %Game{game | state: :start, deck: deck, discard: [discard], players: players}
+    %Game{game | state: :start, deck: deck, discard: [discard], players: Enum.reverse(players)}
   end
 
   defp get_deck do
@@ -204,7 +270,12 @@ defmodule Skyjo.Game do
   defp next_player(game) do
     player_index = Enum.find_index(game.players, &(&1.code == game.cur_player))
     player = Enum.at(game.players, player_index - 1, List.last(game.players))
-    player.code
+
+    if player.active? do
+      player.code
+    else
+      next_player(%{game | cur_player: player.code})
+    end
   end
 
   defp player_ready?(%Game{players: players}, pid) do
@@ -215,9 +286,10 @@ defmodule Skyjo.Game do
   end
 
   defp check_readiness(%Game{players: players, cur_player: nil} = game) do
-    if Enum.all?(players, &player_ready?(game, &1.code)) do
+    if players |> active_players() |> Enum.all?(&player_ready?(game, &1.code)) do
       player =
         game.players
+        |> active_players()
         |> Enum.sort_by(&get_score(game, &1.code))
         |> List.last()
 
@@ -228,7 +300,7 @@ defmodule Skyjo.Game do
   end
 
   defp check_readiness(%Game{players: players} = game) do
-    if Enum.all?(players, &player_ready?(game, &1.code)) do
+    if players |> active_players() |> Enum.all?(&player_ready?(game, &1.code)) do
       %Game{game | state: :draw}
     else
       game
@@ -289,7 +361,9 @@ defmodule Skyjo.Game do
   defp double_check_endgame(game), do: game
 
   defp tally_round_scores(%Game{} = game, pid) do
-    scores = Enum.map(game.players, &get_score(game, &1.code)) |> Enum.sort()
+    scores =
+      game.players |> active_players() |> Enum.map(&get_score(game, &1.code)) |> Enum.sort()
+
     p_score = get_score(game, pid)
 
     should_double =
@@ -303,9 +377,10 @@ defmodule Skyjo.Game do
     new_players =
       Enum.map(game.players, fn player ->
         score =
-          case {get_score(game, player.code), player.code, should_double} do
-            {score, ^pid, true} -> {score, :doubled}
-            {score, ^pid, _} -> {score, :first}
+          case {get_score(game, player.code), player, should_double} do
+            {score, %{code: ^pid}, true} -> {score, :doubled}
+            {score, %{code: ^pid}, _} -> {score, :first}
+            {_, %{active?: false}, _} -> {0, :inactive}
             {score, _, _} -> score
           end
 
@@ -316,7 +391,13 @@ defmodule Skyjo.Game do
   end
 
   defp set_finished_state(%Game{players: players} = game) do
-    max_score = players |> Enum.map(&sum_scores(&1.scores)) |> Enum.sort() |> List.last()
+    max_score =
+      players
+      |> active_players()
+      |> Enum.map(&sum_scores(&1.scores))
+      |> Enum.sort()
+      |> List.last()
+
     next_state = if max_score >= 100, do: :game_finished, else: :round_finished
     %Game{game | state: next_state, out_player: nil}
   end
@@ -326,12 +407,14 @@ defmodule Skyjo.Game do
     |> Enum.map(fn
       {num, :doubled} -> num * 2
       {num, :first} -> num
+      {_, :inactive} -> 0
       num -> num
     end)
     |> Enum.sum()
   end
 
   def render_score({num, :doubled}), do: "#{num} x 2"
+  def render_score({_, :inactive}), do: ""
   def render_score({num, _}), do: num
   def render_score(num), do: num
 

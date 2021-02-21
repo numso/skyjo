@@ -21,7 +21,8 @@ ul {
   list-style: none;
 }
 
-button, .btn {
+button,
+.btn {
   font-family: Arial;
   display: block;
   box-sizing: border-box;
@@ -37,6 +38,7 @@ button, .btn {
   color: white;
   border-radius: 40px;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     background: #3a3a77;
@@ -44,6 +46,18 @@ button, .btn {
 
   &:active {
     background: #2e2e5f;
+  }
+
+  &.danger {
+    background: #de3535;
+
+    &:hover {
+      background: #c52e2e;
+    }
+
+    &:active {
+      background: #b12929;
+    }
   }
 }
 

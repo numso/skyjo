@@ -13,6 +13,8 @@ config :skyjo, SkyjoWeb.Endpoint,
   url: [host: "skyjo.dallinosmun.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :skyjo, :chromecast, app_id: "34761D84"
+
 # Do not print debug messages in production
 config :logger, level: :info
 

@@ -17,6 +17,21 @@
     ol {
       font-size: 24px;
       padding-bottom: 18px;
+
+      .wrapper {
+        display: flex;
+        align-items: center;
+
+        .name {
+          max-width: 400px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .host-tag {
+          padding-left: 8px;
+        }
+      }
     }
 
     .sharing {
@@ -148,6 +163,10 @@
 
       th {
         min-width: 48px;
+      }
+
+      tr.inactive {
+        opacity: 0.3;
       }
 
       tr > td:first-child {

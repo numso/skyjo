@@ -12,7 +12,7 @@ defmodule Skyjo.Games do
   end
 
   def set_game(game) do
-    broadcast(game)
+    broadcast(game.code, {:game_updated, game})
     Agent.update(__MODULE__, &Map.put(&1, game.code, game))
   end
 
@@ -20,7 +20,7 @@ defmodule Skyjo.Games do
     Phoenix.PubSub.subscribe(Skyjo.PubSub, @topic <> code)
   end
 
-  defp broadcast(game) do
-    Phoenix.PubSub.broadcast(Skyjo.PubSub, @topic <> game.code, {:game_updated, game})
+  def broadcast(code, msg) do
+    Phoenix.PubSub.broadcast(Skyjo.PubSub, @topic <> code, msg)
   end
 end

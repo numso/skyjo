@@ -1,7 +1,7 @@
 <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
 <div id="play">
-  <div id="cast" phx-hook="cast" data-game-id="<%= @game.code %>" data-app-id="EE1584B1">
+  <div id="cast" phx-hook="cast" data-game-id="<%= @game.code %>" data-app-id="<%= cast_app_id() %>">
     <google-cast-launcher></google-cast-launcher>
   </div>
 
@@ -10,29 +10,39 @@
       <h1>Players</h1>
 
       <ol>
-        <%= for p <- Enum.reverse(@game.players) do %>
+        <%= for {p, i} <- @game.players |> Enum.reverse() |> Enum.with_index() do %>
           <li>
-            <%= if p == @player do %>
-              <form phx-submit="noop" phx-change="update_name" autocomplete="off">
-                <input type="text" name="name" value="<%= p.name %>" id="rename" phx-hook="rename" />
-              </form>
-            <% else %>
-              <%= p.name %>
-            <% end %>
-            <%= if p.host?, do: "(host)" %>
+            <div class="wrapper">
+              <%= if p == @player do %>
+                <form phx-submit="noop" phx-change="update_name" autocomplete="off">
+                  <input type="text" name="name" value="<%= p.name %>" id="rename" phx-hook="rename" />
+                </form>
+              <% else %>
+                <div class="name"><%= p.name %></div>
+              <% end %>
+              <%= if i == 0 do %>
+                <div class="host-tag">(host)</div>
+              <% end %>
+              <%= if is_host(@game, @player) and p != @player do %>
+                <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+              <% end %>
+            </div>
           </li>
         <% end %>
       </ol>
 
-      <%= if @player.host? do %>
-        <%= if length(@game.players) >= 2 do %>
-          <button phx-click="start">Start Game</button>
+      <div class="actions">
+        <%= if is_host(@game, @player) do %>
+          <%= if game_can_start(@game) do %>
+            <button phx-click="start">Start Game</button>
+          <% else %>
+            <span>Not enough players.</span>
+          <% end %>
         <% else %>
-          <span>Not enough players.</span>
+          <span>Waiting for the host to start the game.</span>
         <% end %>
-      <% else %>
-        <span>Waiting for the host to start the game.</span>
-      <% end %>
+        <button class="danger" phx-click="leave">Leave Game</button>
+      </div>
     </div>
 
     <hr />
@@ -58,10 +68,32 @@
         <h1>Round Over</h1>
         <div>Round Score: <%= Skyjo.Game.render_score(List.first(@player.scores)) %></div>
         <div>Total Score: <%= Skyjo.Game.sum_scores(@player.scores) %></div>
-        <%= if @player.ready? do %>
-          <div>Ready! Waiting for others...</div>
-        <% else %>
-          <button phx-click="ready">Ready!</button>
+        <div class="actions">
+          <%= if @player.ready? do %>
+            <div>Ready! Waiting for others...</div>
+          <% else %>
+            <button phx-click="ready">Ready!</button>
+          <% end %>
+          <button class="danger" phx-click="leave">Leave Game</button>
+        </div>
+        <%= if is_host(@game, @player) do %>
+          <hr />
+          <div class="blarg">
+            <ol>
+              <%= for {p, i} <- @game.players |> Enum.filter(& &1.active?) |> Enum.reverse() |> Enum.with_index() do %>
+                <li>
+                  <div class="wrapper">
+                    <div class="name"><%= p.name %></div>
+                    <%= if i == 0 do %>
+                      <div class="host-tag">(host)</div>
+                    <% else %>
+                      <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+                    <% end %>
+                  </div>
+                </li>
+              <% end %>
+            </ol>
+          </div>
         <% end %>
       </div>
     <% end %>
@@ -69,12 +101,35 @@
     <%= if @game.state == :game_finished do %>
       <div class="overlay">
         <h1>Game Over</h1>
+        <%# TODO:: actually calculate this %>
         <div>You placed 1st. or 2nd. or last. I don't know</div>
         <div>Final Score: <%= Skyjo.Game.sum_scores(@player.scores) %></div>
-        <%= if @player.ready? do %>
-          <div>Ready! Waiting for others...</div>
-        <% else %>
-          <button phx-click="ready">Play Again</button>
+        <div class="actions">
+          <%= if @player.ready? do %>
+            <div>Ready! Waiting for others...</div>
+          <% else %>
+            <button phx-click="ready">Play Again</button>
+          <% end %>
+          <button class="danger" phx-click="leave">Leave Game</button>
+        </div>
+        <%= if is_host(@game, @player) do %>
+          <hr />
+          <div class="blarg">
+            <ol>
+              <%= for {p, i} <- @game.players |> Enum.filter(& &1.active?) |> Enum.reverse() |> Enum.with_index() do %>
+                <li>
+                  <div class="wrapper">
+                    <div class="name"><%= p.name %></div>
+                    <%= if i == 0 do %>
+                      <div class="host-tag">(host)</div>
+                    <% else %>
+                      <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+                    <% end %>
+                  </div>
+                </li>
+              <% end %>
+            </ol>
+          </div>
         <% end %>
       </div>
     <% end %>
@@ -87,19 +142,19 @@
       <div class="drawn">
         <h1>Drawn</h1>
         <div phx-click="discard">
-          <%= raw card(@game.cur_card) %>
+          <%= raw render_card(@game.cur_card) %>
         </div>
       </div>
       <div class="deck">
         <h1>Deck</h1>
         <div phx-click="take_deck">
-          <%= raw card(:back) %>
+          <%= raw render_card(:back) %>
         </div>
       </div>
       <div class="discard">
         <h1>Discard</h1>
         <div phx-click="take_discard">
-          <%= raw card(List.first(@game.discard)) %>
+          <%= raw render_card(List.first(@game.discard)) %>
         </div>
       </div>
     </div>

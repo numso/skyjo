@@ -27,6 +27,8 @@ config :skyjo, SkyjoWeb.Endpoint,
     ]
   ]
 
+config :skyjo, :chromecast, app_id: "EE1584B1"
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
