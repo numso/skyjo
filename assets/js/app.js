@@ -18,6 +18,7 @@ import NProgress from 'nprogress'
 import { LiveSocket } from 'phoenix_live_view'
 
 import chooks from './cast'
+import dhooks from './drag'
 import qhooks from './qrcode'
 import rhooks from './rename'
 
@@ -27,7 +28,7 @@ const csrfToken = document
 
 const liveSocket = new LiveSocket('/live', Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: { ...chooks, ...qhooks, ...rhooks }
+  hooks: { ...chooks, ...dhooks, ...qhooks, ...rhooks }
 })
 
 // Show progress bar on live navigation and form submits

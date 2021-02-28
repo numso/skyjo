@@ -114,9 +114,8 @@
     }
 
     &.deck-discard > .instructions {
-      right: 0;
-      width: 60vw;
-      max-width: 330px;
+      max-width: 160px;
+      margin: 0 auto;
     }
 
     &.deck-reveal > .instructions {
@@ -127,8 +126,7 @@
     &.deck-none > div,
     &.deck-reveal > div,
     &.deck-draw > .drawn,
-    &.deck-discard > .deck,
-    &.deck-discard > .discard {
+    &.deck-discard > .deck {
       top: -600px;
     }
 
@@ -154,6 +152,11 @@
       margin: 0;
       margin-bottom: 8px;
     }
+
+    button {
+      position: absolute;
+      top: 100px;
+    }
   }
 
   .cards {
@@ -165,6 +168,10 @@
     grid-gap: 10px;
     width: 100%;
     max-width: 470px;
+
+    &.gamestate-draw {
+      opacity: 0.5;
+    }
 
     svg {
       width: 100%;
@@ -201,4 +208,19 @@
       margin-left: 16px;
     }
   }
+}
+
+#somethingamazing {
+  position: relative;
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+
+.hovered-card {
+  border-radius: 8px;
+  box-shadow: 0 0 10px 6px white;
+  background: #ffffffeb;
 }

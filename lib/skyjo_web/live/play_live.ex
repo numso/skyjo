@@ -73,6 +73,16 @@ defmodule SkyjoWeb.PlayLive do
   end
 
   @impl true
+  def handle_event("drop", %{"i" => i}, socket) do
+    send_game_message(socket, {:drop, String.to_integer(i)})
+  end
+
+  @impl true
+  def handle_event("undo", _, socket) do
+    send_game_message(socket, :undo)
+  end
+
+  @impl true
   def handle_event("take_discard", _, socket) do
     send_game_message(socket, :take_discard)
   end
@@ -144,9 +154,9 @@ defmodule SkyjoWeb.PlayLive do
   def instruction(game, player) do
     case deck_state(game, player) do
       "none" -> ""
-      "draw" -> "Pick one of these ➜"
-      "discard" -> "Choose where to put it. Or tap it to discard it."
-      "reveal" -> "Pick a spot to reveal ↓"
+      "draw" -> "Pick a card from the deck or discard pile"
+      "discard" -> "Tap and drag your card to place it"
+      "reveal" -> "Tap a spot on your board to reveal it"
     end
   end
 

@@ -125,7 +125,7 @@ defmodule Skyjo.Game do
     %Game{game | state: :reveal, cur_card: nil, discard: [game.cur_card | game.discard]}
   end
 
-  defp do_transition(%Game{state: :discard, cur_player: pid} = game, pid, {:reveal, i}) do
+  defp do_transition(%Game{state: :discard, cur_player: pid} = game, pid, {:drop, i}) do
     case get_card(game, pid, i) do
       {_, _, :duplicate} ->
         game
@@ -140,6 +140,11 @@ defmodule Skyjo.Game do
         |> (fn game -> %Game{game | cur_player: next_player(game)} end).()
         |> double_check_endgame()
     end
+  end
+
+  defp do_transition(%Game{state: :reveal, cur_player: pid} = game, pid, :undo) do
+    [cur_card | discard] = game.discard
+    %Game{game | state: :discard, cur_card: cur_card, discard: discard}
   end
 
   defp do_transition(%Game{state: :reveal, cur_player: pid} = game, pid, {:reveal, i}) do
