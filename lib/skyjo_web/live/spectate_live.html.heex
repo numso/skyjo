@@ -23,7 +23,7 @@
           <div
             id="qrcode"
             phx-hook="qrcode"
-            data-url="<%= Routes.home_url(@socket, :join, code: @game.code) %>"
+            data-url={Routes.home_url(@socket, :join, code: @game.code)}
             phx-update="ignore"
           ></div>
         </div>
@@ -46,13 +46,13 @@
             </thead>
             <tbody>
               <%= for p <- Enum.reverse(@game.players) do %>
-                <tr class="<%= if not p.active?, do: "inactive" %>">
+                <tr class={if not p.active?, do: "inactive"}>
                   <td>
                     <%= p.name %>
                     <span><%= if p.ready?, do: "✓" %></span>
                   </td>
                   <%= for s <- Enum.reverse(p.scores) do %>
-                    <td class="<%= score_class(s) %>"><%= Skyjo.Game.render_score(s) %></td>
+                    <td class={score_class(s)}><%= Skyjo.Game.render_score(s) %></td>
                   <% end %>
                   <td></td>
                   <td><%= Skyjo.Game.sum_scores(p.scores) %></td>
@@ -68,7 +68,7 @@
           <%= for row <- rows(@game) do %>
             <div class="row">
               <%= for p <- row do %>
-                <div class="player <%= player_class(@game, p) %>">
+                <div class={"player #{player_class(@game, p)}"}>
                   <label><%= p.name %></label>
                   <div class="cards">
                     <%= for column <- Enum.chunk_every(p.cards, 3) do %>

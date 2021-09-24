@@ -1,0 +1,181 @@
+/* This file is for your main application CSS */
+@import './phoenix.css';
+@import './home.css';
+@import './rules.css';
+@import './play.css';
+@import './spectate.css';
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+button,
+.btn {
+  font-family: Arial;
+  display: block;
+  box-sizing: border-box;
+  text-align: center;
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px 32px;
+  border: none;
+  outline: none;
+  background: #454590;
+  color: white;
+  border-radius: 40px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:hover,
+.btn:hover {
+  background: #3a3a77;
+}
+
+button:active,
+.btn:active {
+  background: #2e2e5f;
+}
+
+button.danger,
+.btn.danger {
+  background: #de3535;
+}
+
+button.danger:hover,
+.btn.danger:hover {
+  background: #c52e2e;
+}
+
+button.danger:active,
+.btn.danger:active {
+  background: #b12929;
+}
+
+input {
+  border: none;
+  font-size: 18px;
+  padding: 14px 24px;
+  outline: none;
+  min-width: 0;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.card {
+  border-radius: 5px;
+  border: 5px solid white;
+  width: 100px;
+  height: 150px;
+}
+
+.card.back {
+  background: #555;
+  color: white;
+  position: relative;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.card.back > :first-child {
+  position: absolute;
+  top: 30px;
+  left: 12px;
+  transform: rotate(165deg);
+}
+
+.card.back > :last-child {
+  position: absolute;
+  bottom: 30px;
+  left: 13px;
+  transform: rotate(-15deg);
+}
+
+.card:not(.back) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.card:not(.back) > :nth-child(2) {
+  text-shadow: 0 0 8px white;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.card:not(.back) > :first-child,
+.card:not(.back) > :last-child {
+  font-size: 20px;
+  position: absolute;
+  background: white;
+  border-radius: 100%;
+  padding: 0 8px;
+}
+
+.card:not(.back) > :first-child {
+  top: 4px;
+  left: 4px;
+}
+
+.card:not(.back) > :last-child {
+  bottom: 4px;
+  right: 4px;
+  transform: rotate(180deg);
+}
+
+.card.n-2,
+.card.n-1 {
+  background: #3f27ce;
+  background: radial-gradient(circle, #f7f8fd 0%, #3f27ce 100%);
+}
+
+.card.n0 {
+  background: #57ddfa;
+  background: radial-gradient(circle, #f3f7f6 0%, #57ddfa 100%);
+}
+
+.card.n1,
+.card.n2,
+.card.n3,
+.card.n4 {
+  background: #a0da35;
+  background: radial-gradient(circle, #ecf1f3 0%, #a0da35 100%);
+}
+
+.card.n5,
+.card.n6,
+.card.n7,
+.card.n8 {
+  background: #fdf62e;
+  background: radial-gradient(circle, #f9f6f4 0%, #fdf62e 100%);
+}
+
+.card.n9,
+.card.n10,
+.card.n11,
+.card.n12 {
+  background: #f82932;
+  background: radial-gradient(circle, #f7f7fb 0%, #f82932 100%);
+}

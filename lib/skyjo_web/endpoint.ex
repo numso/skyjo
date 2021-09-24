@@ -10,10 +10,6 @@ defmodule SkyjoWeb.Endpoint do
     signing_salt: "gKamX9yl"
   ]
 
-  socket "/socket", SkyjoWeb.UserSocket,
-    websocket: true,
-    longpoll: false
-
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -24,7 +20,7 @@ defmodule SkyjoWeb.Endpoint do
     at: "/",
     from: :skyjo,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(assets fonts images favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

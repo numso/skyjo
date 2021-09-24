@@ -1,3 +1,5 @@
+import '../vendor/qrcode.min'
+
 export default {
   qrcode: {
     mounted () {

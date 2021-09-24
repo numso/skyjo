@@ -1,0 +1,226 @@
+#cast {
+  z-index: 1000;
+  width: 24px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  --connected-color: #57ddfa;
+  --disconnected-color: white;
+}
+
+#play {
+  background: url('/images/bg.jpg');
+  color: white;
+  min-height: 100%;
+}
+
+#play .sharing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+}
+
+#play .sharing h1 {
+  margin-bottom: 0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+#play .sharing h2 {
+  margin: 20px 0 8px;
+}
+
+#play .sharing input {
+  width: 300px;
+}
+
+#play ol {
+  font-size: 24px;
+  padding-bottom: 18px;
+}
+
+#play ol .wrapper {
+  display: flex;
+  align-items: center;
+}
+
+#play ol .wrapper .name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#play ol .wrapper .host-tag {
+  padding-left: 8px;
+}
+
+#play ol button {
+  padding: 4px 12px;
+  margin-left: 8px;
+}
+
+#play .blarg {
+  display: flex;
+  justify-content: center;
+}
+
+#play .lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#play .lobby .actions {
+  display: flex;
+  align-items: center;
+}
+
+#play .lobby .actions > :last-child {
+  margin-left: 32px;
+}
+
+#play .lobby form {
+  display: inline-block;
+}
+
+#play .lobby input {
+  margin: 8px 0;
+  width: 150px;
+}
+
+#play .decks {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+#play .decks .instructions {
+  position: absolute;
+  top: 20px;
+  font-size: 24px;
+  width: 30vw;
+  transition: all 300ms;
+  text-align: center;
+}
+
+#play .decks.deck-none > .instructions {
+  top: -600px;
+}
+
+#play .decks.deck-draw > .instructions {
+  max-width: 160px;
+  left: 0;
+}
+
+#play .decks.deck-discard > .instructions {
+  max-width: 160px;
+  margin: 0 auto;
+}
+
+#play .decks.deck-reveal > .instructions {
+  width: 80vw;
+  max-width: 500px;
+}
+
+#play .decks.deck-none > div,
+#play .decks.deck-reveal > div,
+#play .decks.deck-draw > .drawn,
+#play .decks.deck-discard > .deck {
+  top: -600px;
+}
+
+#play .decks svg {
+  max-width: 25vw;
+  height: 100%;
+}
+
+#play .decks > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: all 300ms;
+  top: 0;
+}
+
+#play .decks > div + div {
+  margin-left: 5vw;
+}
+
+#play .decks h1 {
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+#play .decks button {
+  position: absolute;
+  top: 100px;
+}
+
+#play .cards {
+  display: grid;
+  margin: 0 auto;
+  padding: 16px 0;
+  grid-template-rows: repeat(3, 1fr);
+  grid-auto-flow: column;
+  grid-gap: 10px;
+  width: 100%;
+  max-width: 470px;
+}
+
+#play .cards.gamestate-draw {
+  opacity: 0.5;
+}
+
+#play .cards svg {
+  width: 100%;
+  height: 100%;
+}
+
+#play .overlay {
+  color: white;
+  text-align: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.overlay h1 {
+  margin: 0;
+  padding: 16px 0;
+}
+
+.overlay .actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.overlay .actions > :last-child {
+  margin-left: 16px;
+}
+
+#somethingamazing {
+  position: relative;
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+
+.hovered-card {
+  border-radius: 8px;
+  box-shadow: 0 0 10px 6px white;
+  background: #ffffffeb;
+}

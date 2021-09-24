@@ -1,0 +1,174 @@
+#spectate {
+  background: url('/images/bg.jpg');
+  color: white;
+  min-height: 100%;
+}
+
+#spectate .loading {
+  font-size: 32px;
+  text-align: center;
+  padding-top: 80px;
+}
+
+#spectate .lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#spectate .lobby ol {
+  font-size: 24px;
+  padding-bottom: 18px;
+}
+
+#spectate .lobby ol .wrapper {
+  display: flex;
+  align-items: center;
+}
+
+#spectate .lobby ol .wrapper .name {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#spectate .lobby ol .wrapper .host-tag {
+  padding-left: 8px;
+}
+
+#spectate .lobby .sharing {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#spectate .lobby .sharing #qrcode {
+  height: 256px;
+  width: 256px;
+}
+
+#spectate .lobby .sharing span {
+  font-size: 48px;
+  font-weight: bold;
+  padding-bottom: 32px;
+}
+
+#spectate .game {
+  display: flex;
+  height: 100vh;
+}
+
+#spectate .game .players {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+#spectate .game .players .row {
+  display: flex;
+  justify-content: center;
+}
+
+#spectate .game .players .row .player {
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+#spectate .game .players .row .player.current {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+#spectate .game .players .row .player.out {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#spectate .game .players .row .player label {
+  font-size: 24px;
+  height: 28px;
+  text-align: center;
+  display: block;
+}
+
+#spectate .game .players .row .player .cards {
+  display: flex;
+  height: calc(50vh - 28px - 16px);
+  width: calc((50vh - 28px - 16px) / 158 * 108 / 3 * 4);
+}
+
+#spectate .game .players .row .player .cards .column {
+  display: flex;
+  flex-direction: column;
+}
+
+#spectate .game .players .row .player .cards svg {
+  height: 33%;
+  width: 100%;
+}
+
+#spectate .game .decks {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+#spectate .game .decks > div label {
+  display: block;
+  text-align: center;
+  font-size: 20px;
+}
+
+#spectate .game .decks > div svg {
+  width: 100%;
+  height: inherit;
+}
+
+#spectate .game .decks > div + div {
+  padding-top: 32px;
+}
+
+#spectate .overlay {
+  color: white;
+  text-align: center;
+}
+
+#spectate .overlay table {
+  background: white;
+  color: black;
+  font-size: 32px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  border-radius: 5px;
+}
+
+#spectate .overlay table .doubled {
+  background: #ffa3a3;
+}
+
+#spectate .overlay table .first {
+  background: #89d889;
+}
+
+#spectate .overlay table span {
+  color: green;
+}
+
+#spectate .overlay table th {
+  min-width: 48px;
+}
+
+#spectate .overlay table tr.inactive {
+  opacity: 0.3;
+}
+
+#spectate .overlay table tr > td:first-child {
+  padding-right: 16px;
+}

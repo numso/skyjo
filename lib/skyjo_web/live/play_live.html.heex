@@ -1,7 +1,7 @@
 <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
 <div id="play">
-  <div id="cast" phx-hook="cast" data-game-id="<%= @game.code %>" data-app-id="<%= cast_app_id() %>">
+  <div id="cast" phx-hook="cast" data-game-id={@game.code} data-app-id={cast_app_id()}>
     <google-cast-launcher></google-cast-launcher>
   </div>
 
@@ -15,7 +15,7 @@
             <div class="wrapper">
               <%= if p == @player do %>
                 <form phx-submit="noop" phx-change="update_name" autocomplete="off">
-                  <input type="text" name="name" value="<%= p.name %>" id="rename" phx-hook="rename" />
+                  <input type="text" name="name" value={p.name} id="rename" phx-hook="rename" />
                 </form>
               <% else %>
                 <div class="name"><%= p.name %></div>
@@ -24,7 +24,7 @@
                 <div class="host-tag">(host)</div>
               <% end %>
               <%= if is_host(@game, @player) and p != @player do %>
-                <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+                <button class="danger" phx-click="kick" phx-value-id={p.code}>Kick</button>
               <% end %>
             </div>
           </li>
@@ -53,13 +53,13 @@
       <div
         id="qrcode"
         phx-hook="qrcode"
-        data-url="<%= Routes.home_url(@socket, :join, code: @game.code) %>"
+        data-url={Routes.home_url(@socket, :join, code: @game.code)}
         phx-update="ignore"
       ></div>
       <h2>...or Going to this URL</h2>
-      <input readonly value="<%= Routes.home_url(@socket, :join, code: @game.code) %>" />
+      <input readonly value={Routes.home_url(@socket, :join, code: @game.code)} />
       <h2>...or Entering this Code</h2>
-      <input readonly value="<%= @game.code %>" />
+      <input readonly value={@game.code} />
     </div>
   <% else %>
 
@@ -87,7 +87,7 @@
                     <%= if i == 0 do %>
                       <div class="host-tag">(host)</div>
                     <% else %>
-                      <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+                      <button class="danger" phx-click="kick" phx-value-id={p.code}>Kick</button>
                     <% end %>
                   </div>
                 </li>
@@ -123,7 +123,7 @@
                     <%= if i == 0 do %>
                       <div class="host-tag">(host)</div>
                     <% else %>
-                      <button class="danger" phx-click="kick" phx-value-id="<%= p.code %>">Kick</button>
+                      <button class="danger" phx-click="kick" phx-value-id={p.code}>Kick</button>
                     <% end %>
                   </div>
                 </li>
@@ -134,7 +134,7 @@
       </div>
     <% end %>
 
-    <div class="decks deck-<%= deck_state(@game, @player) %>">
+    <div class={"decks deck-#{deck_state(@game, @player)}"}>
       <span class="instructions">
         <%= instruction(@game, @player) %>
       </span>
@@ -161,9 +161,9 @@
       </div>
     </div>
 
-    <div class="cards gamestate-<%= deck_state(@game, @player) %>">
+    <div class={"cards gamestate-#{deck_state(@game, @player)}"}>
       <%= for {i, _, state} = card <- @player.cards do %>
-        <div class="<%= if state != :duplicate, do: "mycard" %>" data-i="<%= i %>" phx-click="reveal" phx-value-i="<%= i %>">
+        <div class={if state != :duplicate, do: "mycard"} data-i={i} phx-click="reveal" phx-value-i={i}>
           <%= raw render_card(card) %>
         </div>
       <% end %>

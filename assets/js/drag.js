@@ -1,4 +1,4 @@
-import crossvent from 'crossvent'
+import crossvent from '../vendor/crossvent.min'
 
 export default {
   drag: {
@@ -87,9 +87,9 @@ function touchy (el, op, type, fn) {
     mousedown: 'MSPointerDown',
     mousemove: 'MSPointerMove'
   }
-  if (global.navigator.pointerEnabled) {
+  if (navigator.pointerEnabled) {
     crossvent[op](el, pointers[type], fn)
-  } else if (global.navigator.msPointerEnabled) {
+  } else if (navigator.msPointerEnabled) {
     crossvent[op](el, microsoft[type], fn)
   } else {
     crossvent[op](el, touch[type], fn)
