@@ -10,7 +10,7 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :skyjo, SkyjoWeb.Endpoint,
-  url: [host: "skyjo.dallinosmun.com", port: 80],
+  url: [host: "localhost", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 config :skyjo, :chromecast, app_id: "34761D84"
