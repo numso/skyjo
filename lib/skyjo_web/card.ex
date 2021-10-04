@@ -10,8 +10,6 @@ defmodule SkyjoWeb.Card do
   defp get_number(_), do: :blank
 
   def render(assigns) do
-    IO.inspect(assigns)
-
     ~H"""
     <.inner num={get_number(@num)} />
     """
