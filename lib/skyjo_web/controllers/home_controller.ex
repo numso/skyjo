@@ -1,14 +1,14 @@
 defmodule SkyjoWeb.HomeController do
   use SkyjoWeb, :controller
 
-  alias Skyjo.Game
+  alias Skyjo.{Game, Games}
 
   def index(conn, _params) do
     render(conn, "index.html")
   end
 
   def create(conn, _params) do
-    {player, game} = Game.create()
+    %Game{players: [player]} = game = Games.create()
     conn |> redirect(to: "/play/#{game.code}?player=#{player.code}")
   end
 
