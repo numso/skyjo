@@ -1,4 +1,6 @@
 defmodule Skyjo.Game do
+  use GenServer
+
   alias Skyjo.{Game, Games}
 
   defstruct code: nil,
@@ -10,11 +12,10 @@ defmodule Skyjo.Game do
             cur_card: nil,
             out_player: nil
 
-  def create() do
+  defp new_game() do
     player = new_player()
     game = %Game{code: new_code(), state: :lobby, players: [player]}
-    :ok = Games.set_game(game)
-    {player, game}
+    game
   end
 
   defp new_player() do
@@ -28,19 +29,53 @@ defmodule Skyjo.Game do
     }
   end
 
+  defp code_to_name(%Game{code: code}), do: code_to_name(code)
+  defp code_to_name(code), do: String.to_atom("game:" <> code)
+
+  @impl true
+  def init(arg), do: {:ok, arg}
+
+  def start_link(_) do
+    game = new_game()
+    Games.broadcast(game.code, {:game_updated, game})
+    name = code_to_name(game)
+    GenServer.start_link(__MODULE__, game, name: name)
+  end
+
   def join(code) when code in ["", nil], do: {:error, :code_missing}
 
   def join(code) do
-    case Games.get_game(code) do
-      nil ->
-        {:error, :game_missing}
+    case code |> code_to_name() |> GenServer.whereis() do
+      nil -> {:error, :game_missing}
+      pid -> GenServer.call(pid, :join)
+    end
+  end
 
+  def get_game(code) do
+    case code |> code_to_name() |> GenServer.whereis() do
+      nil -> nil
+      pid -> GenServer.call(pid, :game)
+    end
+  end
+
+  def transition(code, pid, action) do
+    code_to_name(code) |> GenServer.cast({:transition, pid, action})
+  end
+
+  @impl true
+  def handle_call(:game, _from, game) do
+    {:reply, game, game}
+  end
+
+  @impl true
+  def handle_call(:join, _from, game) do
+    case game do
       game when game.state not in [:lobby, :round_finished, :game_finished] ->
-        {:error, :game_in_progress}
+        {:reply, {:error, :game_in_progress}, game}
 
       game ->
         if game.players |> active_players() |> length() == 8 do
-          {:error, :full_game}
+          {:reply, {:error, :full_game}, game}
         else
           player =
             if game.state == :lobby do
@@ -57,14 +92,17 @@ defmodule Skyjo.Game do
             end
 
           new_game = %Game{game | players: [player | game.players]}
-          :ok = Games.set_game(new_game)
-          {:ok, {player, new_game}}
+          Games.broadcast(new_game.code, {:game_updated, new_game})
+          {:reply, {:ok, {player, new_game}}, new_game}
         end
     end
   end
 
-  def transition(game, pid, action) do
-    do_transition(game, pid, action) |> Games.set_game()
+  @impl true
+  def handle_cast({:transition, pid, action}, game) do
+    game = do_transition(game, pid, action)
+    Games.broadcast(game.code, {:game_updated, game})
+    {:noreply, game}
   end
 
   defp do_transition(%Game{} = game, pid, {:rename, name}) do

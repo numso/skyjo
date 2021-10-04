@@ -8,7 +8,7 @@ defmodule Skyjo.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      Skyjo.Games,
+      {DynamicSupervisor, strategy: :one_for_one, name: Skyjo.Games},
       # Start the Telemetry supervisor
       SkyjoWeb.Telemetry,
       # Start the PubSub system
