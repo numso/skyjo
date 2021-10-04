@@ -144,19 +144,19 @@
       <div class="drawn">
         <h1>Drawn</h1>
         <div id="somethingamazing" phx-hook="drag">
-          <%= raw render_card(@game.cur_card) %>
+          <Card.render num={@game.cur_card} />
         </div>
       </div>
       <div class="deck">
         <h1>Deck</h1>
         <div phx-click="take_deck">
-          <%= raw render_card(:back) %>
+          <Card.render num={:back} />
         </div>
       </div>
       <div class="discard">
         <h1>Discard</h1>
         <div class="mycard" data-discard="true" phx-click="take_discard">
-          <%= raw render_card(List.first(@game.discard)) %>
+          <Card.render num={List.first(@game.discard)} />
         </div>
       </div>
     </div>
@@ -164,7 +164,7 @@
     <div class={"cards gamestate-#{deck_state(@game, @player)}"}>
       <%= for {i, _, state} = card <- @player.cards do %>
         <div class={if state != :duplicate, do: "mycard"} data-i={i} phx-click="reveal" phx-value-i={i}>
-          <%= raw render_card(card) %>
+          <Card.render num={card} />
         </div>
       <% end %>
     </div>

@@ -1,18 +1,32 @@
 defmodule SkyjoWeb.Card do
-  def render({_, _, :hidden}), do: render(:back)
-  def render({_, _, :duplicate}), do: render(:blank)
-  def render({_, num, _}), do: render(num)
+  use Phoenix.Component
 
-  def render(:blank) do
+  @allowed Enum.to_list(-2..12) ++ [:back, :blank]
+
+  defp get_number({_, _, :hidden}), do: :back
+  defp get_number({_, _, :duplicate}), do: :blank
+  defp get_number({_, num, _}), do: num
+  defp get_number(num) when num in @allowed, do: num
+  defp get_number(_), do: :blank
+
+  def render(assigns) do
+    IO.inspect(assigns)
+
+    ~H"""
+    <.inner num={get_number(@num)} />
     """
+  end
+
+  def inner(%{num: :blank} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" stroke="white" stroke-width="4"/>
     </svg>
     """
   end
 
-  def render(:back) do
-    """
+  def inner(%{num: :back} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#555555" stroke="white" stroke-width="4"/>
     <path d="M29.846 122.401C29.6519 121.677 29.2457 121.187 28.6274 120.932C28.0166 120.675 26.9936 120.525 25.5583 120.481C24.123 120.437 22.9472 120.274 22.031 119.994C20.2765 119.453 19.196 118.424 18.7896 116.908C18.4337 115.579 18.6801 114.341 19.5287 113.191C20.3849 112.04 21.677 111.233 23.4051 110.77C24.5521 110.462 25.6313 110.399 26.6425 110.581C27.6538 110.763 28.5211 111.178 29.2445 111.825C29.966 112.465 30.4541 113.26 30.7088 114.211L27.8563 114.976C27.6258 114.115 27.1742 113.516 26.5015 113.179C25.8342 112.832 24.9988 112.793 23.9951 113.062C23.0594 113.313 22.3848 113.708 21.9712 114.247C21.5653 114.785 21.4583 115.412 21.6504 116.129C21.8122 116.733 22.2269 117.163 22.8945 117.421C23.5601 117.672 24.5859 117.817 25.9718 117.858C27.3558 117.892 28.5022 118.05 29.4109 118.332C30.3175 118.607 31.0369 119.013 31.569 119.549C32.099 120.079 32.4773 120.766 32.7038 121.611C33.0718 122.985 32.8367 124.22 31.9986 125.318C31.166 126.407 29.848 127.193 28.0444 127.676C26.8521 127.996 25.6955 128.071 24.5745 127.902C23.4591 127.724 22.5181 127.321 21.7514 126.693C20.9922 126.064 20.4741 125.232 20.1971 124.198L23.0609 123.431C23.3117 124.366 23.8152 125.008 24.5715 125.355C25.3278 125.703 26.2832 125.722 27.4378 125.412C28.4339 125.145 29.1274 124.745 29.5183 124.212C29.9147 123.669 30.0239 123.065 29.846 122.401ZM39.1839 116.818L37.8469 119.299L39.2239 124.438L36.3601 125.205L31.944 108.724L34.8078 107.957L36.8794 115.688L37.9394 113.305L41.2147 106.24L44.6784 105.312L40.5109 114.254L49.4454 121.699L46.0496 122.609L39.1839 116.818ZM54.0383 111.175L55.7375 102.349L58.9069 101.499L56.1734 113.393L57.7992 119.461L54.924 120.231L53.2983 114.164L44.9727 105.233L48.1535 104.381L54.0383 111.175ZM66.3551 99.5037L69.2076 98.7394L72.3044 110.297C72.727 111.874 72.5683 113.259 71.8285 114.452C71.0962 115.643 69.9226 116.455 68.3077 116.888C66.5871 117.349 65.1427 117.271 63.9744 116.653C62.8061 116.036 62.0147 114.954 61.6002 113.407L64.4527 112.643C64.6873 113.518 65.0793 114.121 65.6287 114.451C66.1837 114.771 66.8724 114.821 67.695 114.601C68.4647 114.395 69.0082 113.978 69.3255 113.351C69.6483 112.715 69.6895 111.948 69.4488 111.05L66.3551 99.5037ZM87.9668 103.006C88.3995 104.621 88.5004 106.115 88.2696 107.487C88.0367 108.851 87.4875 110.001 86.622 110.937C85.7621 111.863 84.6567 112.507 83.3059 112.869C81.9702 113.227 80.691 113.222 79.4681 112.854C78.2508 112.476 77.1937 111.761 76.2966 110.707C75.4071 109.651 74.7473 108.336 74.3171 106.761L74.0684 105.832C73.6377 104.225 73.5406 102.73 73.777 101.349C74.0209 99.9651 74.5728 98.8102 75.4328 97.8842C76.2983 96.9487 77.4026 96.3009 78.7459 95.941C80.0891 95.5811 81.3646 95.5871 82.5723 95.9591C83.7856 96.3215 84.838 97.0343 85.7295 98.0976C86.619 99.1534 87.2829 100.484 87.7211 102.089L87.9668 103.006ZM84.8724 102.913C84.3831 101.087 83.6609 99.7802 82.7058 98.9927C81.7582 98.2033 80.6506 97.9784 79.3828 98.3181C78.1452 98.6497 77.3059 99.3963 76.865 100.558C76.4295 101.71 76.4418 103.174 76.9019 104.952L77.1567 105.903C77.642 107.714 78.368 109.02 79.3347 109.82C80.3089 110.619 81.4224 110.85 82.6751 110.514C83.9428 110.175 84.7869 109.431 85.2072 108.283C85.6351 107.133 85.6004 105.63 85.103 103.773L84.8724 102.913Z" fill="white"/>
@@ -21,8 +35,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(-2) do
-    """
+  def inner(%{num: -2} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#3F27CE"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -43,8 +57,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(-1) do
-    """
+  def inner(%{num: -1} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#3F27CE"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -65,8 +79,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(0) do
-    """
+  def inner(%{num: 0} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#57DDFA"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -87,8 +101,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(1) do
-    """
+  def inner(%{num: 1} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#A0DA35"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -109,8 +123,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(2) do
-    """
+  def inner(%{num: 2} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#A0DA35"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -131,8 +145,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(3) do
-    """
+  def inner(%{num: 3} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#A0DA35"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -153,8 +167,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(4) do
-    """
+  def inner(%{num: 4} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#A0DA35"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -175,8 +189,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(5) do
-    """
+  def inner(%{num: 5} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#FDF62E"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -197,8 +211,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(6) do
-    """
+  def inner(%{num: 6} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#FDF62E"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -219,8 +233,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(7) do
-    """
+  def inner(%{num: 7} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#FDF62E"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -241,8 +255,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(8) do
-    """
+  def inner(%{num: 8} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#FDF62E"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -263,8 +277,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(9) do
-    """
+  def inner(%{num: 9} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#F82932"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -285,8 +299,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(10) do
-    """
+  def inner(%{num: 10} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#F82932"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -307,8 +321,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(11) do
-    """
+  def inner(%{num: 11} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#F82932"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -329,8 +343,8 @@ defmodule SkyjoWeb.Card do
     """
   end
 
-  def render(12) do
-    """
+  def inner(%{num: 12} = assigns) do
+    ~H"""
     <svg width="108" height="158" viewBox="0 0 108 158" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="104" height="154" rx="7" fill="#F82932"/>
     <rect x="2" y="2" width="104" height="154" rx="7" fill="url(#paint0_radial)"/>
@@ -350,6 +364,4 @@ defmodule SkyjoWeb.Card do
     </svg>
     """
   end
-
-  def render(_), do: render(:blank)
 end
