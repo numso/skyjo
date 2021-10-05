@@ -65,6 +65,4 @@ defmodule SkyjoWeb.SpectateLive do
   defp player_class(%{cur_player: pid}, %{code: pid}), do: "current"
   defp player_class(%{out_player: pid}, %{code: pid}), do: "out"
   defp player_class(_, _), do: ""
-
-  defp render_card(card), do: Card.render(card)
 end

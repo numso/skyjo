@@ -74,7 +74,7 @@
                     <%= for column <- Enum.chunk_every(p.cards, 3) do %>
                       <div class="column">
                         <%= for card <- column do %>
-                          <%= raw render_card(card) %>
+                          <Card.render num={card} />
                         <% end %>
                       </div>
                     <% end %>
@@ -87,15 +87,15 @@
         <div class="decks">
           <div class="deck">
             <label>Deck</label>
-            <%= raw render_card(:back) %>
+            <Card.render num={:back} />
           </div>
           <div class="discard">
             <label>Discard</label>
-            <%= raw @game.discard |> List.first() |> render_card() %>
+            <Card.render num={List.first(@game.discard)} />
           </div>
           <div class="drawn">
             <label>Drawn</label>
-            <%= raw @game.cur_card |> render_card() %>
+            <Card.render num={@game.cur_card} />
           </div>
         </div>
       </div>

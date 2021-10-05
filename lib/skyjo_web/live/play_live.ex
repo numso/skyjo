@@ -162,6 +162,4 @@ defmodule SkyjoWeb.PlayLive do
 
   def my_turn?(%{cur_player: pid}, %{code: pid}), do: true
   def my_turn?(_, _), do: false
-
-  defp render_card(card), do: Card.render(card)
 end
